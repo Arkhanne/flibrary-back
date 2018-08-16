@@ -8,6 +8,7 @@ const MongoStore = require('connect-mongo')(session);
 const cors = require('cors');
 
 const authRouter = require('./routes/auth');
+const filmsRouter = require('./routes/films');
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.use(session({
  }));
 
 app.use('/api/auth', authRouter);
+app.use('/api/films', filmsRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
