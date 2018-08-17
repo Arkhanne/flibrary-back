@@ -5,7 +5,7 @@ const request = require('request');
 
 /* SEARCH */
 router.get('/search/:filter', (req, res, next) => {
-  request(`${baseURL}${req.params.filter}`, (error, response, body) => {
+  request(`${baseURL}${req.params.filter}&type=movie`, (error, response, body) => {
     if (!error && response.statusCode == 200) {
       if (JSON.parse(body).Error) {
         console.log(JSON.parse(body).Error);
