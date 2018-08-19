@@ -24,14 +24,14 @@ router.get('/search/:filter', (req, res, next) => {
   })
 });
 
-router.post('/addToFavourites/:imdbId', (req, res, next) => {
+router.post('/addToFavourites/:params', (req, res, next) => {
   const imdbId = '';
   const title = '';
   const year = 0;
   const score = 0;
   const reviews = undefined;
   const users = undefined;
-  const body = {};
+  const params = req.params.params.split("&");
 
   const newFilm = Film({
     imdbId,
@@ -42,28 +42,25 @@ router.post('/addToFavourites/:imdbId', (req, res, next) => {
     users
   });
 
-  request(`${baseURL}i=${req.params.imdbId}&type=movie`, (error, response, body) => {
+  request(`${baseURL}i=${params[0]}&type=movie`, (error, response, body) => {
     if (!error && response.statusCode == 200) {
       if (JSON.parse(body).Error) {
         console.log(JSON.parse(body).Error);
       }
 
-      switch (JSON.parse(body).Error) {
-        case 'Movie not found!':
-          res.status(200).json({code: 'movie-not-found'});
-          break;
-
-        default:
-          body = JSON.parse(body); 
-          newFilm.imdbId = body.imdbID;
-          newFilm.title = body.Title;
-          newFilm.year = body.Year;
-          
-          newFilm.save()
-            .then(() => {
-              console.log('Film saved');
-            });
-          break;
+      apiErrors = manageApiErrors(JSON.parse(body).Error);
+      if (apiErrors.status === 0) {
+        body = JSON.parse(body); 
+        newFilm.imdbId = body.imdbID;
+        newFilm.title = body.Title;
+        newFilm.year = body.Year;
+        newFilm.users = [params[1]];
+        newFilm.save()
+          .then(() => {
+            console.log('Film saved');
+          });
+      } else {
+        res.status(apiErrors.status).json({code: apiErrors.code});
       }
     } else {
       res.status(404).json({code: 'not-found'});
