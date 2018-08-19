@@ -1,10 +1,13 @@
 const mongoose = require("mongoose");
 const Schema   = mongoose.Schema;
 
-const film = new Schema({
-  title: {
-    type: String,
+const filmSchema = new Schema({
+  imdbId: {
+    type:String,
     required: true
+  },
+  title: {
+    type: String
   },
   year: {
     type: Number
@@ -13,11 +16,11 @@ const film = new Schema({
     type: Number
   },
   reviews: {
-    type: {type: mongoose.Schema.Types.ObjectId, ref: 'Review'}
+    type: mongoose.Schema.Types.ObjectId, ref: 'Review'
   },
-  reviews: {
-    users: {type: mongoose.Schema.Types.ObjectId, ref: 'User'}
-  }
+  users: {
+    type: mongoose.Schema.Types.ObjectId, ref: 'User'
+  },
 }, {
   timestamps: true
 });
