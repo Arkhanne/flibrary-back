@@ -89,6 +89,37 @@ router.post('/addToFavourites/:params', (req, res, next) => {
     .catch(next);
 })
 
+router.get('/filmsByUser/:userId', (req, res, next) => {
+  // let imdbID = '';
+  const userId = req.params.userId;
+  // const score = 0;
+  // const reviews = [];
+  // const users = [];
+  // const params = req.params.params.split("&");
+
+  // const newFilm = Film({
+  //   imdbID,
+  //   score,
+  //   reviews,
+  //   users
+  // });
+
+  // imdbID = params[0];
+  // userId = params[1];
+
+  // Search if film already exists
+  Film.find({ users : userId })
+    .then((films) => {
+      if (films) {
+        console.log(films);
+        res.json(films);
+      } else {
+
+      }
+    })
+    .catch(next);
+})
+
 function manageApiErrors(error) {
   let status = 0;
   let code = '';
