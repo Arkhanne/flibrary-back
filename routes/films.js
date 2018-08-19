@@ -12,18 +12,11 @@ router.get('/search/:filter', (req, res, next) => {
         console.log(JSON.parse(body).Error);
       }
 
-      switch (JSON.parse(body).Error) {
-        case 'Too many results.':
-          res.status(200).json({code: 'too-many-results'});
-          break;
-        
-        case 'Movie not found!':
-          res.status(200).json({code: 'movie-not-found'});
-          break;
-
-        default:
-          res.json(JSON.parse(body));
-          break;
+      apiErrors = manageApiErrors(JSON.parse(body).Error);
+      if (apiErrors.status === 0) {
+        res.json(JSON.parse(body));
+      } else {
+        res.status(apiErrors.status).json({code: apiErrors.code});
       }
     } else {
       res.status(404).json({code: 'not-found'});
@@ -77,5 +70,27 @@ router.post('/addToFavourites/:imdbId', (req, res, next) => {
     }
   })
 })
+
+function manageApiErrors(error) {
+  let status = 0;
+  let code = '';
+
+  switch (error) {
+    case 'Too many results.':
+      status = 200;
+      code = 'too-many-results'
+      break;
+    
+    case 'Movie not found!':
+      status = 200;
+      code = 'movie-not-found'
+      break;
+
+    default:
+      break;
+  }
+
+  return {status, code};
+}
 
 module.exports = router;
