@@ -27,6 +27,9 @@ router.get('/search/:filter', (req, res, next) => {
 router.post('/addToFavourites/:params', (req, res, next) => {
   let imdbID = '';
   let userId = '';
+  const title = ''
+  const poster = '';
+  const year = 0;
   const score = 0;
   const reviews = [];
   const users = [];
@@ -34,6 +37,9 @@ router.post('/addToFavourites/:params', (req, res, next) => {
 
   const newFilm = Film({
     imdbID,
+    title,
+    poster,
+    year,
     score,
     reviews,
     users
@@ -70,6 +76,9 @@ router.post('/addToFavourites/:params', (req, res, next) => {
 
               body = JSON.parse(body); 
               newFilm.imdbID = body.imdbID;
+              newFilm.title = body.Title;
+              newFilm.poster = body.Poster;
+              newFilm.year = body.Year;
               newFilm.score = 0;
               newFilm.users = users;
 
