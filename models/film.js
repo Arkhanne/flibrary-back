@@ -6,9 +6,9 @@ const filmSchema = new Schema({
     type: String,
     required: true
   },
-  title: String,
-  poster: String,
-  year: Number,
+  Title: String,
+  Poster: String,
+  Year: Number,
   score: Number,
   reviews: [{type: mongoose.Schema.Types.ObjectId, ref: 'Review'}],
   users: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
