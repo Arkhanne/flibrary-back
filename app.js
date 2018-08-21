@@ -18,11 +18,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(cors({
- credentials: true,
- origin: [process.env.CLIENT_URL]
-}));
-
 app.use(session({
   store: new MongoStore({
     mongooseConnection: mongoose.connection,
@@ -36,6 +31,10 @@ app.use(session({
   }
  }));
 
+ app.use(cors({
+  credentials: true,
+  origin: [process.env.CLIENT_URL]
+}));
 
 app.use('/api/auth', authRouter);
 app.use('/api/films', filmsRouter);
