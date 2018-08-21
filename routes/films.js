@@ -30,7 +30,7 @@ router.post('/addToFavourites/:params', (req, res, next) => {
   const Title = ''
   const Poster = '';
   const Year = 0;
-  const score = 0;
+  const acumUsersScore = 0;
   const reviews = [];
   const users = [];
   const params = req.params.params.split("&");
@@ -40,7 +40,7 @@ router.post('/addToFavourites/:params', (req, res, next) => {
     Title,
     Poster,
     Year,
-    score,
+    acumUsersScore,
     reviews,
     users
   });
@@ -79,7 +79,7 @@ router.post('/addToFavourites/:params', (req, res, next) => {
               newFilm.Title = body.Title;
               newFilm.Poster = body.Poster;
               newFilm.Year = body.Year;
-              newFilm.score = 0;
+              newFilm.acumUsersScore = 0;
               newFilm.users = users;
 
               newFilm.save()
@@ -124,6 +124,87 @@ router.get('/filmsByUser/:userId', (req, res, next) => {
         res.json(films);
       } else {
 
+      }
+    })
+    .catch(next);
+})
+
+router.post('/vote/:params', (req, res, next) => {
+  let imdbID = '';
+  let userId = '';
+  // const Title = ''
+  // const Poster = '';
+  // const Year = 0;
+  let score = 0;
+  // const reviews = [];
+  // const users = [];
+  const params = req.params.params.split("&");
+  let ratingIndex = -1;
+  // const newFilm = Film({
+  //   imdbID,
+  //   Title,
+  //   Poster,
+  //   Year,
+  //   score,
+  //   reviews,
+  //   users
+  // });
+
+  const newUserRatig = {
+    userId,
+    score
+  }
+
+  imdbID = params[0];
+  userId = params[1];
+  score = params[2];
+
+  Film.findOne({ imdbID })
+    .then((film) => {
+      if (film) {
+        // ratingIndex = film.ratings.filter((rating, index) => { 
+        //   if (rating.userId.equals(userId)) {
+        //     return index;
+        //   }
+        // });
+
+        // ratingIndex = film.ratings.map(function(x) {return x.userId; }).indexOf(userId);
+        let exitWhile = false;
+        let index = 0;
+        while (!exitWhile && index < film.ratings.length) {
+          if (film.ratings[index].userId.equals(userId)) {
+            exitWhile = true;
+          } else {
+            index++;
+          }
+        }
+
+        if (exitWhile) {
+          ratingIndex = index;
+        }
+        
+        if (ratingIndex === -1) {
+          // Add user rating
+          newUserRatig.userId = userId;
+          newUserRatig.score = score;
+          film.acumUsersScore += score;
+          film.ratings.push(newUserRatig);
+          film.save()
+            .then(() => {
+              console.log('New user rating added to film');
+            });
+        } else {
+          // Modify user rating
+          film.acumUsersScore -= film.ratings[ratingIndex].score;
+          film.ratings[ratingIndex].score = score;
+          film.acumUsersScore += score;
+          film.save()
+            .then(() => {
+              console.log('User rate modified');
+            });
+        }
+      } else {
+        res.status(404).json({code: 'not-found'});
       }
     })
     .catch(next);
