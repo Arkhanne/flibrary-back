@@ -15,8 +15,28 @@ router.get('/search/:filter', (req, res, next) => {
       }
 
       apiErrors = manageApiErrors(JSON.parse(body).Error);
+      
       if (apiErrors.status === 0) {
-        res.json(JSON.parse(body));
+        films = JSON.parse(body);
+        
+        if (typeof(films.Search) === "undefined") {
+          
+          Film.findOne({ imdbID: films.imdbID })
+            .then((film) => {
+              if (film) {
+                films["score"] = film.score;
+              } else {
+                films["score"] = "N/A";
+              }
+              return films;
+            })
+            .then((films) => {
+              res.json(films);
+            })
+            .catch(next);
+        } else {
+          res.json(films);
+        }
       } else {
         res.status(apiErrors.status).json({code: apiErrors.code});
       }
