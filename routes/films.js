@@ -1,6 +1,8 @@
+require('dotenv').config();
+
 const express = require('express');
 const router = express.Router();
-const baseURL = 'http://www.omdbapi.com/?apikey=e87f567&';
+const baseURL = 'http://www.omdbapi.com/?apikey=' + process.env.API_KEY + '&';
 const request = require('request');
 
 const Film = require('../models/film');
