@@ -32,6 +32,7 @@ router.post('/addToFavourites/:params', (req, res, next) => {
   const Title = ''
   const Poster = '';
   const Year = 0;
+  const score = 0;
   const acumUsersScore = 0;
   const reviews = [];
   const users = [];
@@ -42,6 +43,7 @@ router.post('/addToFavourites/:params', (req, res, next) => {
     Title,
     Poster,
     Year,
+    score,
     acumUsersScore,
     reviews,
     users
@@ -60,8 +62,12 @@ router.post('/addToFavourites/:params', (req, res, next) => {
           film.users.push(userId);
           film.save()
             .then(() => {
+              res.status(200).json({code: 'user-added-to-film'});
               console.log('User added to film');
             });
+        } else {
+          res.status(200).json({code: 'film-is-already-favourite'});
+          console.log('Thi films is already a favourite of the user')
         }
       } else {
         // Create the film for the first time
@@ -81,12 +87,14 @@ router.post('/addToFavourites/:params', (req, res, next) => {
               newFilm.Title = body.Title;
               newFilm.Poster = body.Poster;
               newFilm.Year = body.Year;
+              newFilm.score = 0;
               newFilm.acumUsersScore = 0;
               newFilm.users = users;
 
               newFilm.save()
                 .then(() => {
-                  console.log('Film saved');
+                  res.status(200).json({code: 'film-added-to-favourites'});
+                  console.log('Film added to favourites');
                 });
             } else {
               res.status(apiErrors.status).json({code: apiErrors.code});
@@ -118,14 +126,12 @@ router.get('/filmsByUser/:userId', (req, res, next) => {
   // imdbID = params[0];
   // userId = params[1];
 
-  // Search if film already exists
   Film.find({ users : userId })
     .then((films) => {
       if (films) {
-        console.log(films);
         res.json(films);
       } else {
-
+        res.status(200).json({code: 'user-has-no-favourites'});
       }
     })
     .catch(next);
@@ -164,15 +170,10 @@ router.post('/vote/:params', (req, res, next) => {
   Film.findOne({ imdbID })
     .then((film) => {
       if (film) {
-        // ratingIndex = film.ratings.filter((rating, index) => { 
-        //   if (rating.userId.equals(userId)) {
-        //     return index;
-        //   }
-        // });
-
-        // ratingIndex = film.ratings.map(function(x) {return x.userId; }).indexOf(userId);
         let exitWhile = false;
         let index = 0;
+
+        // Find the previous user rating
         while (!exitWhile && index < film.ratings.length) {
           if (film.ratings[index].userId.equals(userId)) {
             exitWhile = true;
@@ -182,27 +183,32 @@ router.post('/vote/:params', (req, res, next) => {
         }
 
         if (exitWhile) {
+          // There is a previous user rating
           ratingIndex = index;
         }
         
         if (ratingIndex === -1) {
           // Add user rating
           newUserRatig.userId = userId;
-          newUserRatig.score = score;
-          film.acumUsersScore += score;
+          newUserRatig.score = parseInt(score, 10);
+          film.acumUsersScore += parseInt(score, 10);
+          film.score = calcScore(film.acumUsersScore, film.ratings.length + 1);
           film.ratings.push(newUserRatig);
           film.save()
             .then(() => {
+              res.status(200).json({code: 'user-rating-added'});
               console.log('New user rating added to film');
             });
         } else {
           // Modify user rating
           film.acumUsersScore -= film.ratings[ratingIndex].score;
-          film.ratings[ratingIndex].score = score;
-          film.acumUsersScore += score;
+          film.ratings[ratingIndex].score = parseInt(score, 10);
+          film.acumUsersScore += parseInt(score, 10);
+          film.score = calcScore(film.acumUsersScore, film.ratings.length);
           film.save()
             .then(() => {
-              console.log('User rate modified');
+              res.status(200).json({code: 'user-rating-modified'});
+              console.log('User rating modified');
             });
         }
       } else {
@@ -211,6 +217,12 @@ router.post('/vote/:params', (req, res, next) => {
     })
     .catch(next);
 })
+
+function calcScore(acumScore, ratingsQty) {
+  ratingsQty = ratingsQty === 0 ? 1 : ratingsQty;
+  
+  return Math.round(acumScore / ratingsQty * 10);
+}
 
 function manageApiErrors(error) {
   let status = 0;
