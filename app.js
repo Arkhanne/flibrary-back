@@ -12,11 +12,6 @@ const filmsRouter = require('./routes/films');
 
 const app = express();
 
-app.use(cors({
-  credentials: true,
-  origin: [process.env.CLIENT_URL]
-}));
-
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -35,6 +30,11 @@ app.use(session({
     maxAge: 24 * 60 * 60 * 1000
   }
  }));
+
+ app.use(cors({
+  credentials: true,
+  origin: [process.env.CLIENT_URL]
+}));
 
 app.use('/api/auth', authRouter);
 app.use('/api/films', filmsRouter);
