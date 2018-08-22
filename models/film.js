@@ -14,7 +14,7 @@ const filmSchema = new Schema({
   reviews: [{type: mongoose.Schema.Types.ObjectId, ref: 'Review'}],
   users: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
   ratings: [{userId: {type: mongoose.Schema.Types.ObjectId, ref: 'User'}, score: Number}],
-  reviews: [{userId: {type: mongoose.Schema.Types.ObjectId, ref: 'User'}, date: Date, reviews: String}]
+  reviews: [{userId: {type: mongoose.Schema.Types.ObjectId, ref: 'User'}, date: Date, review: String}]
 }, {
   timestamps: true
 });

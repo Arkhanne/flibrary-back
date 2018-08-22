@@ -21,7 +21,7 @@ router.get('/search/:filter', (req, res, next) => {
         
         if (typeof(films.Search) === "undefined") {
           
-          Film.findOne({ imdbID: films.imdbID })
+          Film.findOne({ imdbID: films.imdbID }).populate('reviews.userId')
             .then((film) => {
               if (film) {
                 films["score"] = film.score;
@@ -43,6 +43,10 @@ router.get('/search/:filter', (req, res, next) => {
                     } else {
                       index++;
                     }
+                  }
+
+                  if (film.reviews) {
+                    films["reviews"] = film.reviews;
                   }
 
                   if (exitWhile) {
@@ -158,22 +162,7 @@ router.post('/addToFavourites/:params', (req, res, next) => {
 })
 
 router.get('/filmsByUser/:userId', (req, res, next) => {
-  // let imdbID = '';
   const userId = req.params.userId;
-  // const score = 0;
-  // const reviews = [];
-  // const users = [];
-  // const params = req.params.params.split("&");
-
-  // const newFilm = Film({
-  //   imdbID,
-  //   score,
-  //   reviews,
-  //   users
-  // });
-
-  // imdbID = params[0];
-  // userId = params[1];
 
   Film.find({ users : userId })
     .then((films) => {
@@ -189,23 +178,9 @@ router.get('/filmsByUser/:userId', (req, res, next) => {
 router.post('/vote/:params', (req, res, next) => {
   let imdbID = '';
   let userId = '';
-  // const Title = ''
-  // const Poster = '';
-  // const Year = 0;
   let score = 0;
-  // const reviews = [];
-  // const users = [];
   const params = req.params.params.split("&");
   let ratingIndex = -1;
-  // const newFilm = Film({
-  //   imdbID,
-  //   Title,
-  //   Poster,
-  //   Year,
-  //   score,
-  //   reviews,
-  //   users
-  // });
 
   const newUserRatig = {
     userId,
@@ -260,6 +235,47 @@ router.post('/vote/:params', (req, res, next) => {
               console.log('User rating modified');
             });
         }
+      } else {
+        res.status(404).json({code: 'not-found'});
+      }
+    })
+    .catch(next);
+})
+
+router.post('/review/:params', (req, res, next) => {
+  // console.log(req.params.params.split("&"));
+  // res.status(200).json({code: 'test_ok'});
+
+  // let imdbID = '';
+  let userId;
+  let date;
+  let review;
+  // let score = 0;
+  const params = req.params.params.split("&");
+  // let ratingIndex = -1;
+
+  const newReview = {
+    userId,
+    date,
+    review
+  }
+
+  imdbID = params[0];
+  userId = params[1];
+  review = params[2];
+
+  Film.findOne({ imdbID })
+    .then((film) => {
+      if (film) {
+        newReview.userId = userId;
+        newReview.date = new Date;
+        newReview.review = review;
+        film.reviews.push(newReview);
+        film.save()
+          .then(() => {
+            res.status(200).json({code: 'review-added'});
+            console.log('Review added');
+          });
       } else {
         res.status(404).json({code: 'not-found'});
       }
