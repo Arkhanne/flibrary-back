@@ -25,9 +25,38 @@ router.get('/search/:filter', (req, res, next) => {
             .then((film) => {
               if (film) {
                 films["score"] = film.score;
+                
+                if (film.users) {
+                  films["favourite"] = film.users.indexOf(req.session.currentUser._id) > -1;
+                } else {
+                  films["favourite"] = false;
+                  films["userScore"] = 'N/A'
+                }
+
+                if (film.ratings) {
+                  let exitWhile = false;
+                  let index = 0;
+                  // Find the previous user rating
+                  while (!exitWhile && index < film.ratings.length) {
+                    if (film.ratings[index].userId.equals(req.session.currentUser._id)) {
+                      exitWhile = true;
+                    } else {
+                      index++;
+                    }
+                  }
+
+                  if (exitWhile) {
+                    // There is a previous user rating
+                    films["userScore"] = film.ratings[index].score;
+                  } else {
+                    films["userScore"] = 'N/A'
+                  }
+                }
               } else {
                 films["score"] = "N/A";
+                films["favourite"] = false;
               }
+
               return films;
             })
             .then((films) => {
