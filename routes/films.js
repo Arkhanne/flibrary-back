@@ -250,16 +250,10 @@ router.post('/vote/:params', (req, res, next) => {
 })
 
 router.post('/review/:params', (req, res, next) => {
-  // console.log(req.params.params.split("&"));
-  // res.status(200).json({code: 'test_ok'});
-
-  // let imdbID = '';
   let userId;
   let date;
   let review;
-  // let score = 0;
   const params = req.params.params.split("&");
-  // let ratingIndex = -1;
 
   const newReview = {
     userId,
